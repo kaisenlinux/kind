@@ -1,0 +1,5 @@
+kind (0.11.1-1kaisen) kaisen-packages; urgency=medium
+
+  * First packaging for Kaisen Linux
+
+ -- Kevin Chevreuil - Kaisen <kaisen@kaisenlinux.org>  Mon, 14 Feb 2022 00:10:51 +0100

@@ -1,0 +1,18 @@
+Source: kind
+Section: admin
+Priority: optional
+Maintainer: Kevin Chevreuil - Kaisen <kaisen@kaisenlinux.org>
+Build-Depends: debhelper-compat (= 13), dh-golang, golang-go (>= 1.17)
+Standards-Version: 4.6.0
+Homepage: https://kind.sigs.k8s.io/
+Vcs-Browser: https://gitlab.com/kaisenlinux/packages/kind
+Vcs-Git: https://gitlab.com/kaisenlinux/packages/kind.git
+XS-Go-Import-Path: github.com/kubernetes-sigs/kind
+
+Package: kind
+Architecture: amd64 arm64
+Depends: ${shlibs:Depends},
+	 ${misc:Depends},
+	 golang-go (>= 1.17),
+	 docker,
+Description: Kubernetes IN Docker - local clusters for testing Kubernetes

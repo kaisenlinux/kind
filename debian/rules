@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+export GOPATH=$(CURDIR)/obj-x86_64-linux-gnu
+
+%:
+	dh $@ --buildsystem=golang
+
+override_dh_auto_build:
+	go get
+	go build
+
+override_dh_auto_test:
+	go test
+
+override_dh_auto_install:
+	dh_auto_install -- --no-source
+	mkdir -p debian/kind/usr/share/bash-completion/completions debian/kind/usr/share/zsh/vendor-completions
+	$(CURDIR)/kind completion bash > debian/kind/usr/share/bash-completion/completions/kind
+	$(CURDIR)/kind completion zsh > debian/kind/usr/share/zsh/vendor-completions/_kind
