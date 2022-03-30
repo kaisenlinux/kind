@@ -17,12 +17,13 @@ description: |-
   [issue tracker]: https://github.com/kubernetes-sigs/kind/issues
   [file an issue]: https://github.com/kubernetes-sigs/kind/issues/new
   [#kind]: https://kubernetes.slack.com/messages/CEKK1KTN2/
-  [kubernetes slack]: http://slack.k8s.io/
+  [kubernetes slack]: https://slack.k8s.io/
 ---
 
 
 
 ## Contents
+* [Troubleshooting Kind](#troubleshooting-kind)
 * [Kubectl Version Skew](#kubectl-version-skew) (Kubernetes limits supported version skew)
 * [Older Docker Installations](#older-docker-installations) (untested, known to have bugs)
 * [Docker Installed With Snap](#docker-installed-with-snap) (snap filesystem restrictions problematic)
@@ -37,8 +38,14 @@ description: |-
 * [Chrome OS](#chrome-os) (unsupported)
 * [AppArmor](#apparmor) (may break things, consider disabling)
 * [IPv6 Port Forwarding](#ipv6-port-forwarding) (docker doesn't seem to implement this correctly)
-* [Fedora 32 Firewalld](#fedora32-firewalld) (nftables + docker broken, switch to iptables)
 * [Couldn't find an alternative telinit implementation to spawn](#docker-init-daemon-config)
+* [Fedora](#fedora) (various)
+* [Failed to get rootfs info](#failed-to-get-rootfs-info--stat-failed-on-dev)
+
+## Troubleshooting Kind
+
+If the cluster fails to create, try again with the `--retain` option (preserving the failed container),
+then run `kind export logs` to export the logs from the container to a temporary directory on the host.
 
 ## Kubectl Version Skew
 
@@ -306,7 +313,39 @@ your workloads inside the cluster via the nodes IPv6 addresses.
 
 See Previous Discussion: [kind#1326]
 
-## Fedora32 Firewalld
+## Failed to get rootfs info / "stat failed on /dev/..."
+
+On some systems, creating a cluster times out with these errors in kubelet.log (device varies):
+
+```
+stat failed on /dev/nvme0n1p3 with error: no such file or directory
+"Failed to start ContainerManager" err="failed to get rootfs info: failed to get device for dir \"/var/lib/kubelet\": could not find device with major: 0, minor: 40 in cached partitions map"
+```
+
+Kubernetes needs access to storage device nodes in order to do some stuff, e.g. tracking free disk space. Therefore, Kind needs to mount the necessary device nodes from the host into the control-plane container — however, it cannot always determine which device Kubernetes requires, since this varies with the host OS and filesystem. For example, the error above occurred with a BTRFS filesystem on Fedora Desktop 35.
+
+This can be worked around by including the necessary device as an extra mount in the cluster configuration file.
+
+```yaml
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  extraMounts:
+    - hostPath: /dev/nvme0n1p3
+      containerPath: /dev/nvme0n1p3
+      propagation: HostToContainer
+```
+
+To identify the device that must be listed, two variations have been observed.
+* The device reported in the error message is a symlink (e.g. `/dev/mapper/luks-903aad3d-...`) — in this case, the config file should refer to the target of that symlink (e.g. `/dev/dm-0`).
+* The device reported in the error message is a regular block device (e.g. `/dev/nvme0n1p3`) — in this case, use the device reported.
+
+See Previous Discussion: [kind#2411]
+
+## Fedora
+
+### Firewalld
 
 On Fedora 32 [firewalld] moved to nftables backend by default.
 This seems to be incompatible with Docker, leading to KIND cluster nodes not
@@ -322,10 +361,20 @@ systemctl restart firewalld
 See [#1547 (comment)](https://github.com/kubernetes-sigs/kind/issues/1547#issuecomment-623756313)
 and [Docker and Fedora 32 article](https://fedoramagazine.org/docker-and-fedora-32/)
 
+### SELinux
+
+On Fedora 33 an update to the SELinux policy causes `kind create cluster` to fail with an error like
+
+```sh
+docker: Error response from daemon: open /dev/dma_heap: permission denied.
+```
+
+Although the policy has been fixed in Fedora 34, the fix has not been backported to Fedora 33 as of June 28, 2021. Putting SELinux in permissive mode (`setenforce 0`) is one known workaround. This disables SELinux until the next boot. For more details, see [kind#2296].
+
 [issue tracker]: https://github.com/kubernetes-sigs/kind/issues
 [file an issue]: https://github.com/kubernetes-sigs/kind/issues/new
 [#kind]: https://kubernetes.slack.com/messages/CEKK1KTN2/
-[kubernetes slack]: http://slack.k8s.io/
+[kubernetes slack]: https://slack.k8s.io/
 [kind#136]: https://github.com/kubernetes-sigs/kind/issues/136
 [kind#136-docker]: https://github.com/kubernetes-sigs/kind/issues/136#issuecomment-457015838
 [kind#156]: https://github.com/kubernetes-sigs/kind/issues/156
@@ -335,6 +384,8 @@ and [Docker and Fedora 32 article](https://fedoramagazine.org/docker-and-fedora-
 [kind#270]: https://github.com/kubernetes-sigs/kind/issues/270
 [kind#1179]: https://github.com/kubernetes-sigs/kind/issues/1179
 [kind#1326]: https://github.com/kubernetes-sigs/kind/issues/1326
+[kind#2296]: https://github.com/kubernetes-sigs/kind/issues/2296
+[kind#2411]: https://github.com/kubernetes-sigs/kind/issues/2411
 [moby#9939]: https://github.com/moby/moby/issues/9939
 [moby#17666]: https://github.com/moby/moby/issues/17666
 [Docker resource lims]: https://docs.docker.com/docker-for-mac/#advanced

@@ -32,7 +32,7 @@ fi
 # We only need to do this setup on linux hosts
 if [ "$(uname)" == 'Linux' ]; then
   # NOTE: this is pinned to a digest for a reason!
-  docker run --rm --privileged multiarch/qemu-user-static@sha256:c772ee1965aa0be9915ee1b018a0dd92ea361b4fa1bcab5bbc033517749b2af4 --reset -p yes
+  docker run --rm --privileged tonistiigi/binfmt:qemu-v6.1.0@sha256:11128304bc582dc7dbaa35947ff3e52e2610d23cecb410ddfa381a6ce74fa763 --install all
 fi
 
 # Ensure we use a builder that can leverage it (the default on linux will not)
