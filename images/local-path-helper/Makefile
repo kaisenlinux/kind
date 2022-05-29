@@ -1,4 +1,4 @@
-# Copyright 2019 The Kubernetes Authors.
+# Copyright 2022 The Kubernetes Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,18 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# first stage build kindnetd binary
-# NOTE: tentatively follow upstream kubernetes go version based on k8s in go.mod
-FROM golang:1.18
-WORKDIR /go/src
-# make deps fetching cacheable
-COPY go.mod go.sum ./
-RUN go mod download
-# build
-COPY . .
-RUN CGO_ENABLED=0 go build -o ./kindnetd ./cmd/kindnetd
-
-# build real kindnetd image
-FROM k8s.gcr.io/build-image/debian-iptables:bullseye-v1.3.0
-COPY --from=0 --chown=root:root ./go/src/kindnetd /bin/kindnetd
-CMD ["/bin/kindnetd"]
+include $(CURDIR)/../Makefile.common.in
