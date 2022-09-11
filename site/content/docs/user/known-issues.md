@@ -33,7 +33,7 @@ description: |-
 * [Pod Errors Due to "too many open files"](#pod-errors-due-to-too-many-open-files) (likely [inotify] limits which are not namespaced)
 * [Docker Permission Denied](#docker-permission-denied) (ensure you have permission to use docker)
 * [Windows Containers](#windows-containers) (unsupported / infeasible)
-* [Non-AMD64 Architectures](#non-amd64-architectures) (images not pre-built yet)
+* [Non-AMD64 Architectures](#nonamd64-architectures) (images not pre-built yet)
 * [Unable to Pull Images](#unable-to-pull-images) (various)
 * [Chrome OS](#chrome-os) (unsupported)
 * [AppArmor](#apparmor) (may break things, consider disabling)
@@ -42,6 +42,7 @@ description: |-
 * [Fedora](#fedora) (various)
 * [Failed to get rootfs info](#failed-to-get-rootfs-info--stat-failed-on-dev)
 * [Failure to Create Cluster with Docker Desktop as Container Runtime](#failure-to-create-cluster-with-docker-desktop-as-container-runtime)
+* [Docker Desktop for macOS and Windows](#docker-desktop-for-macos-and-windows)
 
 ## Troubleshooting Kind
 
@@ -415,3 +416,7 @@ restarting the Docker Engine, the VM used by Docker Desktop will use cgroupv1.
 [AppArmor]: https://en.wikipedia.org/wiki/AppArmor
 [firewalld]: https://firewalld.org/
 [inotify]: https://en.wikipedia.org/wiki/Inotify
+
+## Docker Desktop for macOS and Windows
+
+Docker containers cannot be executed natively on macOS and Windows, therefore Docker Desktop runs them in a Linux VM. As a consequence, the container networks are not exposed to the host and you cannot reach the kind nodes via IP. You can work around this limitation by configuring [extra port mappings](https://kind.sigs.k8s.io/docs/user/configuration/#extra-port-mappings) though.
