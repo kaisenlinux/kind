@@ -27,45 +27,35 @@ ARG TARGETARCH
 
 # Configure containerd and runc binaries from kind-ci/containerd-nightlies repository
 # The repository contains latest stable releases and nightlies built for multiple architectures
-ARG CONTAINERD_VERSION="1.6.9"
+ARG CONTAINERD_VERSION="1.6.19-46-g941215f49"
 ARG CONTAINERD_BASE_URL="https://github.com/kind-ci/containerd-nightlies/releases/download"
 ARG CONTAINERD_URL="${CONTAINERD_BASE_URL}/containerd-${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${TARGETARCH}.tar.gz"
-ARG CONTAINERD_AMD64_SHA256SUM="9bbc3bb338b7a12c6a1d05e32dcb442d5caf809ca14d96e97822a7cba79d710e"
-ARG CONTAINERD_ARM64_SHA256SUM="3a4c2e302a00970c1c13ca721ba0d8c10ee08f257a926766655ac2724a68988a"
-ARG CONTAINERD_PPC64LE_SHA256SUM="69d1b4ab4a56e42d47c6d2d4d58e06e8f3dfc99094e2e40b354879ba97d49bee"
-ARG CONTAINERD_S390X_SHA256SUM="631eb055a66485b2f6b5903620d265602e30759ac102115a4b3f1cce666475f8"
+ARG CONTAINERD_AMD64_SHA256SUM="df182a12d9108042df7dc449506be43f2fed8b3babde5bb9a72e5554e055a085"
+ARG CONTAINERD_ARM64_SHA256SUM="2c76703c81ddaee5295911b8d8816dc84bcd8c5f78e48ea6f03b00a86148694e"
 
 ARG RUNC_URL="${CONTAINERD_BASE_URL}/containerd-${CONTAINERD_VERSION}/runc.${TARGETARCH}"
-ARG RUNC_AMD64_SHA256SUM="82710042741bbe86088ac0658c93ff7131f7b5ae68fa3fdea5a362db91c521b5"
-ARG RUNC_ARM64_SHA256SUM="21924dfdbe8a72589857799ee9a996a24f06972530823bc8f62d13d79efb42af"
-ARG RUNC_PPC64LE_SHA256SUM="de090ecf7ec9eff774f2b2c50703a01472642dbe38652dad467b621d7f0b0d9e"
-ARG RUNC_S390X_SHA256SUM="a7fb998a7598d615a816303583ff88ffa3aa2ca6841a59e21474d342c2a453ed"
+ARG RUNC_AMD64_SHA256SUM="76acadf30309b3e36aeb1bdb69238e52be2dd12e7a3557641e6f25415c1cb29b"
+ARG RUNC_ARM64_SHA256SUM="2216c944455b4664113ce0af8b4a6ddc3beb7bacecc06b45b03b004995c822c1"
 
 # Configure crictl binary from upstream
-ARG CRICTL_VERSION="v1.25.0"
+ARG CRICTL_VERSION="v1.26.1"
 ARG CRICTL_URL="https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${TARGETARCH}.tar.gz"
-ARG CRICTL_AMD64_SHA256SUM="86ab210c007f521ac4cdcbcf0ae3fb2e10923e65f16de83e0e1db191a07f0235"
-ARG CRICTL_ARM64_SHA256SUM="651c939eca010bbf48cc3932516b194028af0893025f9e366127f5b50ad5c4f4"
-ARG CRICTL_PPC64LE_SHA256SUM="1b77d1f198c67b2015104eee6fe7690465b8efa4675ea6b4b958c63d60a487e7"
-ARG CRICTL_S390X_SHA256SUM="6b70ecaae209e196b2b0553e4c5e1b53240d002c88cb05cad442ddd8190d1481"
+ARG CRICTL_AMD64_SHA256SUM="0c1a0f9900c15ee7a55e757bcdc220faca5dd2e1cfc120459ad1f04f08598127"
+ARG CRICTL_ARM64_SHA256SUM="cfa28be524b5da1a6dded455bb497dfead27b1fd089e1161eb008909509be585"
 
 # Configure CNI binaries from upstream
-ARG CNI_PLUGINS_VERSION="v1.1.1"
+ARG CNI_PLUGINS_VERSION="v1.2.0"
 ARG CNI_PLUGINS_TARBALL="${CNI_PLUGINS_VERSION}/cni-plugins-linux-${TARGETARCH}-${CNI_PLUGINS_VERSION}.tgz"
 ARG CNI_PLUGINS_URL="https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_TARBALL}"
-ARG CNI_PLUGINS_AMD64_SHA256SUM="b275772da4026d2161bf8a8b41ed4786754c8a93ebfb6564006d5da7f23831e5"
-ARG CNI_PLUGINS_ARM64_SHA256SUM="16484966a46b4692028ba32d16afd994e079dc2cc63fbc2191d7bfaf5e11f3dd"
-ARG CNI_PLUGINS_PPC64LE_SHA256SUM="1551259fbfe861d942846bee028d5a85f492393e04bcd6609ac8aaa7a3d71431"
-ARG CNI_PLUGINS_S390X_SHA256SUM="767c6b2f191a666522ab18c26aab07de68508a8c7a6d56625e476f35ba527c76"
+ARG CNI_PLUGINS_AMD64_SHA256SUM="f3a841324845ca6bf0d4091b4fc7f97e18a623172158b72fc3fdcdb9d42d2d37"
+ARG CNI_PLUGINS_ARM64_SHA256SUM="525e2b62ba92a1b6f3dc9612449a84aa61652e680f7ebf4eff579795fe464b57"
 
 # Configure containerd-fuse-overlayfs snapshotter binary from upstream
-ARG CONTAINERD_FUSE_OVERLAYFS_VERSION="1.0.4"
+ARG CONTAINERD_FUSE_OVERLAYFS_VERSION="1.0.5"
 ARG CONTAINERD_FUSE_OVERLAYFS_TARBALL="v${CONTAINERD_FUSE_OVERLAYFS_VERSION}/containerd-fuse-overlayfs-${CONTAINERD_FUSE_OVERLAYFS_VERSION}-linux-${TARGETARCH}.tar.gz"
 ARG CONTAINERD_FUSE_OVERLAYFS_URL="https://github.com/containerd/fuse-overlayfs-snapshotter/releases/download/${CONTAINERD_FUSE_OVERLAYFS_TARBALL}"
-ARG CONTAINERD_FUSE_OVERLAYFS_AMD64_SHA256SUM="228417cc97fea4df26ed85182443ee4d5799f65ada0b3ce663bf7e6bc8920f6b"
-ARG CONTAINERD_FUSE_OVERLAYFS_ARM64_SHA256SUM="5ede755ff8fe2cb3e38b59d7eb005ccc29a88037a2fa5f7749d28471ee81c727"
-ARG CONTAINERD_FUSE_OVERLAYFS_PPC64LE_SHA256SUM="cd4775b6de118bc3bc83efb89e4303c96c602b86d63f2df4a083f48e968c171d"
-ARG CONTAINERD_FUSE_OVERLAYFS_S390X_SHA256SUM="55dae4a2c74b1215ec99591b9197e6a651bfcc6f96b4cc0331537fba5411eadc"
+ARG CONTAINERD_FUSE_OVERLAYFS_AMD64_SHA256SUM="1f4b12322cc1b044dfbbeaec30fc42295cedc8b6f0642146ba518333f9d5ddca"
+ARG CONTAINERD_FUSE_OVERLAYFS_ARM64_SHA256SUM="073e83196a7a73bd130fe44085bd65303c7e6cfc8c53ba46d90a16cbb8e5a112"
 
 # copy in static files
 # all scripts are 0755 (rwx r-x r-x)
@@ -134,8 +124,6 @@ RUN echo "Installing containerd ..." \
     && curl -sSL --retry 5 --output /tmp/containerd.${TARGETARCH}.tgz "${CONTAINERD_URL}" \
     && echo "${CONTAINERD_AMD64_SHA256SUM}  /tmp/containerd.amd64.tgz" | tee /tmp/containerd.sha256 \
     && echo "${CONTAINERD_ARM64_SHA256SUM}  /tmp/containerd.arm64.tgz" | tee -a /tmp/containerd.sha256 \
-    && echo "${CONTAINERD_PPC64LE_SHA256SUM}  /tmp/containerd.ppc64le.tgz" | tee -a /tmp/containerd.sha256 \
-    && echo "${CONTAINERD_S390X_SHA256SUM}  /tmp/containerd.s390x.tgz" | tee -a /tmp/containerd.sha256 \
     && sha256sum --ignore-missing -c /tmp/containerd.sha256 \
     && rm -f /tmp/containerd.sha256 \
     && tar -C /usr/local -xzvf /tmp/containerd.${TARGETARCH}.tgz \
@@ -144,8 +132,6 @@ RUN echo "Installing containerd ..." \
     && curl -sSL --retry 5 --output /tmp/runc.${TARGETARCH} "${RUNC_URL}" \
     && echo "${RUNC_AMD64_SHA256SUM}  /tmp/runc.amd64" | tee /tmp/runc.sha256 \
     && echo "${RUNC_ARM64_SHA256SUM}  /tmp/runc.arm64" | tee -a /tmp/runc.sha256 \
-    && echo "${RUNC_PPC64LE_SHA256SUM}  /tmp/runc.ppc64le" | tee -a /tmp/runc.sha256 \
-    && echo "${RUNC_S390X_SHA256SUM}  /tmp/runc.s390x" | tee -a /tmp/runc.sha256 \
     && sha256sum --ignore-missing -c /tmp/runc.sha256 \
     && mv /tmp/runc.${TARGETARCH} /usr/local/sbin/runc \
     && chmod 755 /usr/local/sbin/runc \
@@ -161,8 +147,6 @@ RUN echo "Installing crictl ..." \
     && curl -sSL --retry 5 --output /tmp/crictl.${TARGETARCH}.tgz "${CRICTL_URL}" \
     && echo "${CRICTL_AMD64_SHA256SUM}  /tmp/crictl.amd64.tgz" | tee /tmp/crictl.sha256 \
     && echo "${CRICTL_ARM64_SHA256SUM}  /tmp/crictl.arm64.tgz" | tee -a /tmp/crictl.sha256 \
-    && echo "${CRICTL_PPC64LE_SHA256SUM}  /tmp/crictl.ppc64le.tgz" | tee -a /tmp/crictl.sha256 \
-    && echo "${CRICTL_S390X_SHA256SUM}  /tmp/crictl.s390x.tgz" | tee -a /tmp/crictl.sha256 \
     && sha256sum --ignore-missing -c /tmp/crictl.sha256 \
     && rm -f /tmp/crictl.sha256 \
     && tar -C /usr/local/bin -xzvf /tmp/crictl.${TARGETARCH}.tgz \
@@ -172,8 +156,6 @@ RUN echo "Installing CNI plugin binaries ..." \
     && curl -sSL --retry 5 --output /tmp/cni.${TARGETARCH}.tgz "${CNI_PLUGINS_URL}" \
     && echo "${CNI_PLUGINS_AMD64_SHA256SUM}  /tmp/cni.amd64.tgz" | tee /tmp/cni.sha256 \
     && echo "${CNI_PLUGINS_ARM64_SHA256SUM}  /tmp/cni.arm64.tgz" | tee -a /tmp/cni.sha256 \
-    && echo "${CNI_PLUGINS_PPC64LE_SHA256SUM}  /tmp/cni.ppc64le.tgz" | tee -a /tmp/cni.sha256 \
-    && echo "${CNI_PLUGINS_S390X_SHA256SUM}  /tmp/cni.s390x.tgz" | tee -a /tmp/cni.sha256 \
     && sha256sum --ignore-missing -c /tmp/cni.sha256 \
     && rm -f /tmp/cni.sha256 \
     && mkdir -p /opt/cni/bin \
@@ -191,8 +173,6 @@ RUN echo "Installing containerd-fuse-overlayfs ..." \
     && curl -sSL --retry 5 --output /tmp/containerd-fuse-overlayfs.${TARGETARCH}.tgz "${CONTAINERD_FUSE_OVERLAYFS_URL}" \
     && echo "${CONTAINERD_FUSE_OVERLAYFS_AMD64_SHA256SUM}  /tmp/containerd-fuse-overlayfs.amd64.tgz" | tee /tmp/containerd-fuse-overlayfs.sha256 \
     && echo "${CONTAINERD_FUSE_OVERLAYFS_ARM64_SHA256SUM}  /tmp/containerd-fuse-overlayfs.arm64.tgz" | tee -a /tmp/containerd-fuse-overlayfs.sha256 \
-    && echo "${CONTAINERD_FUSE_OVERLAYFS_PPC64LE_SHA256SUM}  /tmp/containerd-fuse-overlayfs.ppc64le.tgz" | tee -a /tmp/containerd-fuse-overlayfs.sha256 \
-    && echo "${CONTAINERD_FUSE_OVERLAYFS_S390X_SHA256SUM}  /tmp/containerd-fuse-overlayfs.s390x.tgz" | tee -a /tmp/containerd-fuse-overlayfs.sha256 \
     && sha256sum --ignore-missing -c /tmp/containerd-fuse-overlayfs.sha256 \
     && rm -f /tmp/containerd-fuse-overlayfs.sha256 \
     && tar -C /usr/local/bin -xzvf /tmp/containerd-fuse-overlayfs.${TARGETARCH}.tgz \

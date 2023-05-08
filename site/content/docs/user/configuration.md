@@ -181,6 +181,8 @@ networking:
   podSubnet: "10.244.0.0/16"
 {{< /codeFromInline >}}
 
+By default, kind uses ```10.244.0.0/16``` pod subnet for IPv4 and ```fd00:10:244::/56``` pod subnet for IPv6.
+
 #### Service Subnet
 
 You can configure the Kubernetes service subnet used for service IPs by setting
@@ -191,6 +193,8 @@ apiVersion: kind.x-k8s.io/v1alpha4
 networking:
   serviceSubnet: "10.96.0.0/12"
 {{< /codeFromInline >}}
+
+By default, kind uses ```10.96.0.0/16``` service subnet for IPv4 and ```fd00:10:96::/112``` service subnet for IPv6.
 
 #### Disable Default CNI
 
@@ -397,7 +401,7 @@ to configure cluster nodes.
 
 Formally  KIND runs `kubeadm init` on the first control-plane node, we can customize the flags by using the kubeadm
 [InitConfiguration](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-init/#config-file) 
-([spec](https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#InitConfiguration))
+([spec](https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta3#InitConfiguration))
 
 {{< codeFromInline lang="yaml" >}}
 kind: Cluster
@@ -412,7 +416,7 @@ nodes:
         node-labels: "my-label=true"
 {{< /codeFromInline >}}
 
-If you want to do more customization, there are four configuration types available during `kubeadm init`: `InitConfiguration`, `ClusterConfiguration`, `KubeProxyConfiguration`, `KubeletConfiguration`. For example, we could override the apiserver flags by using the kubeadm [ClusterConfiguration](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/control-plane-flags/) ([spec](https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#ClusterConfiguration)):
+If you want to do more customization, there are four configuration types available during `kubeadm init`: `InitConfiguration`, `ClusterConfiguration`, `KubeProxyConfiguration`, `KubeletConfiguration`. For example, we could override the apiserver flags by using the kubeadm [ClusterConfiguration](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/control-plane-flags/) ([spec](https://pkg.go.dev/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta3#ClusterConfiguration)):
 
 {{< codeFromInline lang="yaml" >}}
 kind: Cluster
@@ -431,7 +435,7 @@ On every additional node configured in the KIND cluster,
 worker or control-plane (in HA mode),
 KIND runs `kubeadm join` which can be configured using the 
 [JoinConfiguration](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm-join/#config-file)
-([spec](https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#JoinConfiguration))
+([spec](https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta3#JoinConfiguration))
 
 {{< codeFromInline lang="yaml" >}}
 kind: Cluster
@@ -454,6 +458,49 @@ nodes:
       kubeletExtraArgs:
         node-labels: "my-label3=true"
 {{< /codeFromInline >}}
+
+If you need more control over patching, strategic merge and JSON6092 patches can
+be used as well. These are specified using files in a directory, for example
+`./patches/kube-controller-manager.yaml` could be the following.
+
+{{< codeFromInline lang="yaml" >}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-controller-manager
+  namespace: kube-system
+spec:
+  containers:
+  - name: kube-controller-manager
+    env:
+    - name: KUBE_CACHE_MUTATION_DETECTOR
+      value: "true"
+{{< /codeFromInline >}}
+
+Then in your kind YAML configuration use the following.
+
+{{< codeFromInline lang="yaml" >}}
+nodes:
+- role: control-plane
+  extraMounts:
+  - hostPath: ./patches
+    containerPath: /patches
+
+kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    patches:
+      directory: /patches
+{{< /codeFromInline >}}
+
+Note the `extraMounts` stanza. The node is a container created by
+`kind`. `kubeadm` is run inside this node container, and the local directory
+that contains the patches has to be accessible to `kubeadm`. `extraMounts`
+plumbs a local directory through to this node container.
+
+This example was for changing the manager in the control plane. To use a patch
+for a worker node, use a `JoinConfiguration` patch and an `extraMounts` stanza
+for the `worker` role.
 
 [YAML]: https://yaml.org/
 [feature gates]: https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/
