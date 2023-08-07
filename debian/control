@@ -13,6 +13,5 @@ Package: kind
 Architecture: amd64 arm64
 Depends: ${shlibs:Depends},
 	 ${misc:Depends},
-	 golang-go (>= 1.16),
 	 docker.io,
 Description: Kubernetes IN Docker - local clusters for testing Kubernetes
