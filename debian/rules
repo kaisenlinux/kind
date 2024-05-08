@@ -3,7 +3,7 @@
 export GOPATH=$(CURDIR)/_build
 
 %:
-	dh $@ --buildsystem=golang
+	dh $@ --buildsystem=golang --builddirectory=_build
 
 override_dh_auto_clean:
 	rm -rf $(CURDIR)/_build
@@ -18,7 +18,7 @@ override_dh_auto_test:
 override_dh_dwz:
 
 override_dh_auto_install:
-	dh_auto_install -- --no-source
-	mkdir -p debian/kind/usr/share/bash-completion/completions debian/kind/usr/share/zsh/vendor-completions
-	$(CURDIR)/kind completion bash > debian/kind/usr/share/bash-completion/completions/kind
-	$(CURDIR)/kind completion zsh > debian/kind/usr/share/zsh/vendor-completions/_kind
+	install -p -m 0755 $(CURDIR)/kind $(CURDIR)/debian/kind/usr/bin/
+	install -p -m 0644 $(CURDIR)/debian/kind.png $(CURDIR)/debian/kind/usr/share/pixmaps/
+	$(CURDIR)/debian/kind/usr/bin/kind completion bash > $(CURDIR)/debian/kind/usr/share/bash-completion/completions/kind
+	$(CURDIR)/debian/kind/usr/bin/kind completion zsh > $(CURDIR)/debian/kind/usr/share/zsh/vendor-completions/_kind

@@ -20,16 +20,19 @@
 # start from debian slim, this image is reasonably small as a starting point
 # for a kubernetes node image, it doesn't contain much (anything?) we don't need
 # this stage will install basic files and packages
-ARG BASE_IMAGE=debian:bullseye-slim
+ARG BASE_IMAGE=debian:bookworm-slim
 FROM $BASE_IMAGE as base
 
 # copy in static files
-# all scripts are 0755 (rwx r-x r-x)
-COPY --chmod=0755 files/usr/local/bin/* /usr/local/bin/
-COPY --chmod=0755 files/kind/bin/* /kind/bin/
-
+# all scripts and directories are 0755 (rwx r-x r-x)
 # all non-scripts are 0644 (rw- r-- r--)
-COPY --chmod=0644 files/kind/* /kind/
+COPY --chmod=0755 files/usr/local/bin/* /usr/local/bin/
+
+COPY --chmod=0644 files/kind/ /kind/
+# COPY only applies to files, not the directory itself, so the permissions are
+# fixed in RUN below with a chmod.
+COPY --chmod=0755 files/kind/bin/ /kind/bin/
+
 COPY --chmod=0644 files/LICENSES/* /LICENSES/*
 COPY --chmod=0644 files/etc/* /etc/
 COPY --chmod=0644 files/etc/containerd/* /etc/containerd/
@@ -40,8 +43,6 @@ COPY --chmod=0644 files/etc/systemd/system/kubelet.service.d/* /etc/systemd/syst
 
 # Install dependencies, first from apt, then from release tarballs.
 # NOTE: we use one RUN to minimize layers.
-#
-# First we must ensure that our util scripts are executable.
 #
 # The base image already has a basic userspace + apt but we need to install more packages.
 # Packages installed are broken down into (each on a line):
@@ -68,7 +69,8 @@ COPY --chmod=0644 files/etc/systemd/system/kubelet.service.d/* /etc/systemd/syst
 # Finally we adjust tempfiles cleanup to be 1 minute after "boot" instead of 15m
 # This is plenty after we've done initial setup for a node, but before we are
 # likely to try to export logs etc.
-RUN echo "Installing Packages ..." \
+RUN chmod 755 /kind/bin && \
+    echo "Installing Packages ..." \
     && DEBIAN_FRONTEND=noninteractive clean-install \
       systemd \
       conntrack iptables iproute2 ethtool util-linux mount ebtables kmod \
@@ -85,10 +87,12 @@ RUN echo "Installing Packages ..." \
     && echo "ReadKMsg=no" >> /etc/systemd/journald.conf \
     && ln -s "$(which systemd)" /sbin/init
 
-RUN echo "Enabling services ... " \
+# NOTE: systemd-binfmt.service will register things into binfmt_misc which is kernel-global
+RUN echo "Enabling / Disabling services ... " \
     && systemctl enable kubelet.service \
     && systemctl enable containerd.service \
-    && systemctl enable undo-mount-hacks.service
+    && systemctl enable undo-mount-hacks.service \
+    && systemctl mask systemd-binfmt.service
 
 RUN echo "Ensuring /etc/kubernetes/manifests" \
     && mkdir -p /etc/kubernetes/manifests
@@ -117,7 +121,7 @@ RUN eval "$(gimme "${GO_VERSION}")" \
 # stage for building containerd
 FROM go-build as build-containerd
 ARG TARGETARCH GO_VERSION
-ARG CONTAINERD_VERSION="v1.7.1"
+ARG CONTAINERD_VERSION="v1.7.13"
 ARG CONTAINERD_CLONE_URL="https://github.com/containerd/containerd"
 # we don't build with optional snapshotters, we never select any of these
 # they're not ideal inside kind anyhow, and we save some disk space
@@ -134,7 +138,7 @@ RUN git clone --filter=tree:0 "${CONTAINERD_CLONE_URL}" /containerd \
 # stage for building runc
 FROM go-build as build-runc
 ARG TARGETARCH GO_VERSION
-ARG RUNC_VERSION="v1.1.7"
+ARG RUNC_VERSION="v1.1.12"
 ARG RUNC_CLONE_URL="https://github.com/opencontainers/runc"
 RUN git clone --filter=tree:0 "${RUNC_CLONE_URL}" /runc \
     && cd /runc \
@@ -148,7 +152,7 @@ RUN git clone --filter=tree:0 "${RUNC_CLONE_URL}" /runc \
 FROM go-build as build-crictl
 ARG TARGETARCH GO_VERSION
 ARG CRI_TOOLS_CLONE_URL="https://github.com/kubernetes-sigs/cri-tools"
-ARG CRICTL_VERSION="v1.27.0"
+ARG CRICTL_VERSION="v1.28.0"
 RUN git clone --filter=tree:0 "${CRI_TOOLS_CLONE_URL}" /cri-tools \
     && cd /cri-tools \
     && git checkout "${CRICTL_VERSION}" \
@@ -180,7 +184,7 @@ RUN git clone --filter=tree:0 "${CNI_PLUGINS_CLONE_URL}" /cni-plugins \
 # stage for building containerd-fuse-overlayfs
 FROM go-build as build-fuse-overlayfs
 ARG TARGETARCH GO_VERSION
-ARG CONTAINERD_FUSE_OVERLAYFS_VERSION="v1.0.5"
+ARG CONTAINERD_FUSE_OVERLAYFS_VERSION="v1.0.6"
 ARG CONTAINERD_FUSE_OVERLAYFS_CLONE_URL="https://github.com/containerd/fuse-overlayfs-snapshotter"
 RUN git clone --filter=tree:0 "${CONTAINERD_FUSE_OVERLAYFS_CLONE_URL}" /fuse-overlayfs-snapshotter \
     && cd /fuse-overlayfs-snapshotter \
