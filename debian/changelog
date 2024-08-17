@@ -1,3 +1,11 @@
+kind (0.24.0-1kaisen) kaisen-packages; urgency=medium
+
+  * Import the 0.24.0 release
+  * Bump the Standards-Version
+  * Bump the golang-go version required to build
+
+ -- Kevin Chevreuil - Kaisen <kaisen@kaisenlinux.org>  Sat, 17 Aug 2024 20:11:32 +0200
+
 kind (0.22.0-1kaisen) kaisen-packages; urgency=medium
 
   * Import the 0.22.0 release
