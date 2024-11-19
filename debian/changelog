@@ -1,3 +1,9 @@
+kind (0.25.0-1kaisen) kaisen-packages; urgency=medium
+
+  * Import the 0.25.0 release
+
+ -- Kevin Chevreuil - Kaisen <kaisen@kaisenlinux.org>  Tue, 19 Nov 2024 17:22:36 +0200
+
 kind (0.24.0-1kaisen) kaisen-packages; urgency=medium
 
   * Import the 0.24.0 release
